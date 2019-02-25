@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>聊天室</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font: 13px Helvetica, Arial; }
+        form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+        form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+        form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+        #messages { list-style-type: none; margin: 0; padding: 0; }
+        #messages li { padding: 5px 10px; }
+        #messages li:nth-child(odd) { background: #eee; }
+    </style>
+</head>
+<body>
+<ul id="messages"></ul>
+<form action="">
+    <input id="m" autocomplete="off" /><button>发送</button>
+</form>
+</body>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+    var name=prompt("请输入你的昵称：")
+    var socket=io()
+    //发送昵称到后端
+    socket.emit("join",name)
+    //收到服务器发送的join事件时
+    socket.on("join",function (user) {
+        addLine(user+"加入了群聊")
+    })
+    function addLine(msg) {
+        $('#messages').append($('<li>').text(msg));
+    }
+    //接受服务器发来的message事件
+    socket.on("message",function (msg) {
+        addLine(msg);
+    })
+
+    //当发送按钮被点击时
+    $('form').submit(function () {
+        //获取用户输入的消息
+        var msg=$("#m").val();
+        socket.emit("message",msg);//将消息发送给服务器
+        $("#m").val("");//清空聊天框
+        return false;
+    })
+</script>
+</html>
